@@ -1,0 +1,59 @@
+#control_panel{
+    background-color:cadetblue;
+    border: 1;
+    border-color: black;
+
+}
+
+/* Add your dropdown styles here */
+.region {
+    position: relative;
+    display: inline-block;
+  }
+  
+
+  
+  .region-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    border: 1px solid #ddd;
+    z-index: 1;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  label {
+    display: block;
+    padding: 5px;
+    font-size: large;
+  }
+  
+  label:hover {
+    background-color: #ddd;
+  }
+  
+.text{
+    font-size: large;
+
+}
+.dropdown-toggle{
+    font-size: large;
+    text-align: center;
+    align-items: center;
+}
+
+input[type="range"] {
+    width: 300px;
+    margin: 3px 10px;
+  }
+
+  #slider-value {
+  
+    font-size: 18px;
+  }
+  .nav-item{
+    margin-left: 5px;
+    margin-right: 5px;
+  }
