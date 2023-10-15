@@ -6,6 +6,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
@@ -33,7 +35,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto  mb-lg-0">
+                    <ul class="navbar-nav me-auto  mb-lg-1">
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -41,30 +43,30 @@
                                 X-axis
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><button class="dropdown-item x-axis" type="button" x-axis-value='Birth Rate'>Birth
+                                <li><button class="dropdown-item x-axis-nav" type="button" x-axis-nav-value='Data.Health.Birth Rate'>Birth
                                         Rate</button></li>
-                                <li><button class="dropdown-item x-axis" type="button" x-axis-value='Death Rate'>Death
+                                <li><button class="dropdown-item x-axis-nav" type="button" x-axis-nav-value='Data.Health.Death Rate'>Death
                                         Rate</button></li>
-                                <li><button class="dropdown-item x-axis" type="button" x-axis-value='Land Area'>Land
+                                <li><button class="dropdown-item x-axis-nav" type="button" x-axis-nav-value='Data.Rural Development.Land Area'>Land
                                         Area</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Surface Area'>Surface Area</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Fertility Rate'>Fertility Rate</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Telephone Lines'>Telephone Lines</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Rural Population'>Rural Population</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Total Population'>Total Population</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Population Growth'>Population Growth</button></li>
-                                <li><button class="dropdown-item x-axis" type="button"
-                                        x-axis-value='Population Density'>Population Density</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Rural Development.Surface Area'>Surface Area</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Health.Fertility Rate'>Fertility Rate</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Infrastructure.Telephone Lines'>Telephone Lines</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Rural Development.Rural Population'>Rural Population</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Health.Total Population'>Total Population</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Health.Population Growth'>Population Growth</button></li>
+                                <li><button class="dropdown-item x-axis-nav" type="button"
+                                        x-axis-nav-value='Data.Urban Development.Population Density'>Population Density</button></li>
                             </ul>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link active text" aria-current="page"><span id="x-axis-selected"></span></a>
+                            <a class="nav-link active text" aria-current="page"><span id="x-axis-nav-selected"></span></a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -72,26 +74,26 @@
                                 Size
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                <li><button class="dropdown-item size" type="button" size-value='Birth Rate'>Birth
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Health.Birth Rate'>Birth
                                         Rate</button></li>
-                                <li><button class="dropdown-item size" type="button" size-value='Death Rate'>Death
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Health.Death Rate'>Death
                                         Rate</button></li>
-                                <li><button class="dropdown-item size" type="button" size-value='Land Area'>Land
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Rural Development.Land Area'>Land
                                         Area</button></li>
-                                <li><button class="dropdown-item size" type="button" size-value='Surface Area'>Surface
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Rural Development.Surface Area'>Surface
                                         Area</button></li>
                                 <li><button class="dropdown-item size" type="button"
-                                        size-value='Fertility Rate'>Fertility Rate</button></li>
+                                        size-value='Data.Health.Fertility Rate'>Fertility Rate</button></li>
                                 <li><button class="dropdown-item size" type="button"
-                                        size-value='Telephone Lines'>Telephone Lines</button></li>
-                                <li><button class="dropdown-item size" type="button" size-value='Rural Population'>Rural
+                                        size-value='Data.Infrastructure.Telephone Lines'>Telephone Lines</button></li>
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Rural Development.Rural Population'>Rural
                                         Population</button></li>
-                                <li><button class="dropdown-item size" type="button" size-value='Total Population'>Total
+                                <li><button class="dropdown-item size" type="button" size-value='Data.Health.Total Population'>Total
                                         Population</button></li>
                                 <li><button class="dropdown-item size" type="button"
-                                        size-value='Population Growth'>Population Growth</button></li>
+                                        size-value='Data.Health.Population Growth'>Population Growth</button></li>
                                 <li><button class="dropdown-item size" type="button"
-                                        size-value='Population Density'>Population Density</button></li>
+                                        size-value='Data.Urban Development.Population Density'>Population Density</button></li>
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -109,26 +111,26 @@
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="south_asia"> South Asia
+                                    <input type="checkbox" class="checkbox-item" id="south_asia" value="South Asia"> South Asia
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="europe"> Europe & Central Asia
+                                    <input type="checkbox" class="checkbox-item" id="europe" value = "Europe & Central Asia"> Europe & Central Asia
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="middle_east"> Middle East & North
+                                    <input type="checkbox" class="checkbox-item" id="middle_east" value ="Middle East & North Africa" > Middle East & North
                                     Africa
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="sub-saharan"> Sub-Saharan Africa
+                                    <input type="checkbox" class="checkbox-item" id="sub-saharan" value = "Sub-Saharan Africa"> Sub-Saharan Africa
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="latin"> Latin America & Caribbean
+                                    <input type="checkbox" class="checkbox-item" id="latin" value = "Latin America & Caribbean"> Latin America & Caribbean
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="north_america"> North America
+                                    <input type="checkbox" class="checkbox-item" id="north_america" value = "North America"> North America
                                 </a>
                                 <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="east_asia"> East Asia & Pacific
+                                    <input type="checkbox" class="checkbox-item" id="east_asia" value = "East Asia & Pacific"> East Asia & Pacific
                                 </a>
 
                             </div>
@@ -137,9 +139,8 @@
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item">
                             <a class="nav-link text" aria-current="page"> Year &nbsp;
-                                <input type="range" id="slider" min="1980" max="2013" value="50">
-                                <span class="text" id="slider-value">1980</span>
-
+                                <input type="range" id="slider" min="1980" max="2013" value="1980">
+                                <input type="text" id="year-input" value="1980" class="text-input">
                             </a>
                         </li>
                         <li class="nav-item">
@@ -148,17 +149,19 @@
                                 <span id="playText">Play</span>
                             </button>
                         </li>
-
+                        <a class='year-event' year-value=1998></a>
                     </ul>
 
                 </div>
             </div>
         </nav>
-        <svg width="1600" height="1000">
+        <div id="svg-chart">
+            <svg width="1000" height="500" >
 
-        </svg>
+            </svg>
+        </div>
     </div>
-    </div> 
+    </div>
     <script src="sverma76.js"></script>
 
 </body>

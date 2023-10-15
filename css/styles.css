@@ -57,3 +57,12 @@ input[type="range"] {
     margin-left: 5px;
     margin-right: 5px;
   }
+
+  .text-input{
+    width: 80px;
+    text-align: center;
+  }
+
+  #playButton{
+    margin-top: 5px;
+  }
