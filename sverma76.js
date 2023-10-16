@@ -562,8 +562,7 @@ function addToolTip(){
     console.log('Year is ' + year);
     const slider = document.getElementById("slider");
     slider.value = year;
-  
-    // Dispatch an input event to trigger the change
+
     const inputEvent = new Event("input", {
       bubbles: true,
       cancelable: true,
@@ -579,7 +578,7 @@ function addToolTip(){
  function togglePlayPause() {
    var playIcon = document.getElementById("playIcon");
    var playText = document.getElementById("playText");
- 
+    
    if (!currently_playing) {
      play_animation_pleaaaassssseeeee();
      playIcon.className = "fas fa-pause"; 
