@@ -14,11 +14,13 @@ let height = 600;
 let colorScale;
 let margin = { top: 40, right: 40, bottom: 40, left: 40 };
 let data = []
-let all_countries = []
+let all_countries = new Set()
 let xScale;
 let sizeScale;
 let svg, g;
 let beeswarm;
+let remaining_data;
+let addedCheckboxes, removedCheckboxes;
 
 
 Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
@@ -31,11 +33,11 @@ Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
             let region = data['World bank region'];
             let country = data['name'];
             if (!(region in region_to_countries)) {
-            region_to_countries[region] = [];
+            region_to_countries[region] = new Set();
             }
 
-            if (!region_to_countries[region].includes(country)) {
-            region_to_countries[region].push(country);
+            if (!region_to_countries[region].has(country)) {
+            region_to_countries[region].add(country);
             }
             if(!(country in country_to_region))
                 country_to_region[country] = region });
@@ -47,6 +49,10 @@ Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
             $('[size-value="Data.Health.Death Rate"]').click();
             $('[year-value=1980]').click();
             $('#selectAll').click();
+
+
+            drawBeeswarmChart();
+
             updateChart()
           });
 });
@@ -73,118 +79,208 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Select regional checkbox values
+    checkboxes = document.querySelectorAll(".checkbox-item");
     const selectAllCheckbox = document.getElementById("selectAll");
-    checkboxes = document.querySelectorAll('.checkbox-item');
-      
+    const previousState = new Set();
+  
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener("change", function () {
+        if (checkbox === selectAllCheckbox) {
+          checkboxes.forEach((cb) => {
+            cb.checked = selectAllCheckbox.checked;
+          });
+        } else {
+          updateState();
+        }
+      });
+    });
+  
     selectAllCheckbox.addEventListener("change", function () {
-    checkboxes.forEach((checkbox) => {
-        checkbox.checked = selectAllCheckbox.checked;
-        });
-        checked_regions = collectCheckedRegions()
-        updateChart('region');
+      checkboxes.forEach((cb) => {
+        cb.checked = selectAllCheckbox.checked;
+      });
+      updateState();
     });
-      
-    checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", function () {
-            allChecked = [...checkboxes].every((checkbox) => checkbox.checked);
-            selectAllCheckbox.checked = allChecked;
-        checked_regions = collectCheckedRegions()
+  
+    function updateState() {
+      const currentState = new Set();
+      checkboxes.forEach((cb) => {
+        if (cb.checked) {
+          currentState.add(cb.value);
+        }
+      });
+  
+    addedCheckboxes = new Set(
+        [...currentState].filter((id) => !previousState.has(id))
+      );
+  
+    removedCheckboxes = new Set(
+        [...previousState].filter((id) => !currentState.has(id))
+      );
 
-            updateChart('region');
-        });
+    previousState.clear();
+    currentState.forEach((id) => {
+    previousState.add(id);
     });
-    
+    updateChart(change='region');
+    }
+
+
     // Select and show selected year value
     var yearInput = document.getElementById("year-input");
     const slider = document.getElementById("slider");
-    const sliderValue = document.getElementById("slider-value");
+    // const sliderValue = document.getElementById("slider-value");
 
-    yearInput.addEventListener("change", function() {
+    yearInput.addEventListener("change", function(event) {
+        event.stopPropagation();
+        console.log("nahi chal rha bc 1")
         year = parseInt(yearInput.value);
         slider.value = year;
         updateChart('year');
       });
-    slider.addEventListener("input", function() {
+    slider.addEventListener("input", function(event) {
+        event.stopPropagation();
         year = slider.value;
+        console.log("nahi chal rha bc 2")
+
         yearInput.value = year;
         updateChart('year');
       });
     document.querySelectorAll(' .year-event').forEach(function (item) {
-        item.addEventListener('click', function () {
-        year = parseInt(item.getAttribute('year-value'));
+        item.addEventListener('click', function (event) {
+            event.stopPropagation();
+        year = parseInt(item.getAttribute('value'));
+        console.log("nahi chal rha bc 3")
+
         yearInput.value = year;
         slider.value = year;
         updateChart('year');
         });
     });
+      
+    
 
-    // creeating svg element
-    svg = d3.select("#svg-chart svg");
-    console.log(svg.attr("width"))
-
-    // loading data files
-
-
-
-
-    // Select and show play/pause button value
-    var isPlaying = false; 
-    var animationInterval; 
-
-    function startAnimation() {
-      // Your D3 animation logic here
-    }
-
-    function stopAnimation() {
-      // Your code to stop or pause the animation
-    }
-
-    function togglePlayPause() {
-      var playIcon = document.getElementById("playIcon");
-      var playText = document.getElementById("playText");
-
-      if (!isPlaying) {
-        startAnimation();
-        playIcon.className = "fas fa-pause"; 
-        playText.textContent = "Pause";
-        isPlaying = true;
-      } else {
-        stopAnimation();
-        playIcon.className = "fas fa-play"; 
-        playText.textContent = "Play";
-        isPlaying = false;
-      }
-    }
 
 });
+
 
 function updateChart(change) {
     if(change=='year'){
         console.log('Year change event occured')
+        d3.selectAll('#tooltip').remove()
         updateData()
 
         let b_data = beeswarm(data)
+        //  we are seeing new data coming from (0,0) as 
+        // some countries don't have data for some years and changing year adds new data
+        console.log('total data points are '+ JSON.stringify(b_data.length))
         g.selectAll('circle')
-                .data(b_data)
+                .data(b_data, d => d.data.country)
+                .join('circle')
+                .style('stroke', 'black')
+                .style('stroke-width', 1)
+                .transition()
+                .duration(1000)
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+                .attr("r", d => d.r)
+                .style('fill', d => colorScale(d.data.region))
+
+                .delay(function(d,i){return(i*5)})   
+        addToolTip()         
+        }
+    else if(change=='region') {
+        console.log('region change event occured')
+        updateAllCountries();
+        updateXminmax();
+        updateData();
+
+        // update min max axis
+        svg.select(".x-axis-line")
+        .transition()
+        .duration(1000) 
+        .call(d3.axisBottom(xScale))
+
+        // fade old countries data and adjust beeswarm chart
+        if(removedCheckboxes.size){
+        d3.selectAll('circle').filter(function() {
+            return removedCheckboxes.has(d3.select(this).data()[0].data.region); })
+            .transition()
+            .duration(1000) 
+            .style('opacity', 0)
+            .style('stroke-width', 0)
+            .remove()
+            .on('end', function(){
+                if (d3.selectAll('circle').filter(function() {
+                    return removedCheckboxes.has(d3.select(this).data()[0].data.region);
+                  }).empty()) {
+                remaining_data = d3.selectAll('circle').data().map(d=>d.data)
+                console.log('remaining data is')
+                console.log(remaining_data)
+                let b_remaining_data = beeswarm(remaining_data)
+                g.selectAll('circle')
+                .data(b_remaining_data, d => d.data.country)
                 .join('circle')
                 .transition()
                 .duration(1000)
                 .attr("cx", d => d.x)
                 .attr("cy", d => d.y)
                 .attr("r", d => d.r)
-                .delay(function(d,i){return(i*5)})            
+                .style('fill', d => colorScale(d.data.region))
+                .delay(function(d,i){return(i*5)}) 
+                }
+            });
         }
-    else if(change=='region') {
-        console.log('region change event occured')
-        updateAllCountries();
-        updateXminmax();
-        // svg.select(".x-axis-line")
-        //         .transition()
-        //         .duration(1000) // Adjust the duration as needed
-        //         .call(d3.axisBottom(xScale))
-        //         .on('end', function(){let s=1});
-        updateData();
-    drawBeeswarmChart(year, x_axis_value, selectedSize, checked_regions);
+
+        // add new countries
+        if (addedCheckboxes.size){
+            let new_data = beeswarm(data)
+            console.log('new data is')
+            console.log(new_data)
+            g.selectAll('circle')
+                .data(new_data, d => d.data.country)
+                .join('circle')
+                .each(function(d){
+                    
+                    if( addedCheckboxes.has(d.data.region) ){
+                        console.log('inside newly added circles and data point is')
+                        console.log(d3.select(this))
+                        d3.select(this)
+
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                        .attr("r", d => d.r)
+                        .style('fill', d => colorScale(d.data.region))
+                        .style('opacity', 0)
+                        .style('stroke', 'black')
+                        .style('stroke-width', 1);
+                        d3.select(this)
+                        .transition()
+                        .duration(2000)
+                        .style('opacity', 1)
+                        // .delay(function(d,i){return(i*5)}) 
+
+                    }
+                    else{
+                        d3.select(this)
+                        // .join('circle')
+                        .transition()
+                        .duration(2000)
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                        .attr("r", d => d.r)
+                        .style('fill', d => colorScale(d.data.region))
+                        .style('opacity', 1)
+                        .style('stroke', 'black')
+                        .style('stroke-width', 1)
+                        // .style('fill', d => colorScale(d.data.region))
+                        .delay(function(d,i){return(i*5)}) 
+                    }
+                })
+        }
+
+        addToolTip()         
+
 
     }else if(change=='x-axis'){
         console.log('x-axis change event occured')
@@ -194,10 +290,9 @@ function updateChart(change) {
             .duration(1000)
             .style("opacity", 0)
             .on('end', function () {
-                // After the transition completes, continue with the next step
                 svg.select(".x-axis-line")
                 .transition()
-                .duration(1000) // Adjust the duration as needed
+                .duration(1000) 
                 .call(d3.axisBottom(xScale))
                 .on('end', function(){
                     svg.select('.x-axis-title')
@@ -208,7 +303,7 @@ function updateChart(change) {
                     .on('end', function(){
                         let b_data = beeswarm(data)
                         g.selectAll('circle')
-                                .data(b_data)
+                                .data(b_data, d => d.data.country)
                                 .join('circle')
                                 .transition()
                                 .duration(1000)
@@ -222,14 +317,15 @@ function updateChart(change) {
               });
 
         updateData();
-    // drawBeeswarmChart(year, x_axis_value, selectedSize, checked_regions);
+        addToolTip()         
+
 
     }else if(change=='size'){
         console.log('size change event occured')
         updateData();
         let b_data = beeswarm(data)
         g.selectAll('circle')
-                .data(b_data)
+                .data(b_data, d => d.data.country)
                 .join('circle')
                 .transition()
                 .duration(1000)
@@ -237,92 +333,74 @@ function updateChart(change) {
                 .attr("cy", d => d.y)
                 .attr("r", d => d.r)
                 .delay(function(d,i){return(i*5)})      
-    // drawBeeswarmChart(year, x_axis_value, selectedSize, checked_regions);
+
+        addToolTip()         
+    
 
     }
-    console.log('drawing chart for: ')
-    console.log(year)
-    console.log(x_axis_value)
-    console.log(selectedSize)
-    console.log(checked_regions)
+    const tooltip = d3.select("body").append("div")
+    .attr("id", "tooltip")
+    .style("position", "absolute")
+    // .style("background-color", "white")
+    .style("border", "2px solid black")
+    .style("padding", "5px")
+    .style("opacity", 0.9)
+    .style("display", "none");
+
+    g.selectAll('circle')
+    .on('mouseover', function(event,d){
+      d3.select(this)
+    //   .attr('stroke-width', 4)
+      .style('stroke-width', 4)
+      
+      const xPosition = event.pageX + 10; 
+      const yPosition = event.pageY - 30; 
+      console.log(d)
+      tooltip.html("<span> Country: " + d.data.country + " <br>" + 
+      x_axis_value + ": "+d.data.x +" <br>" +selectedSize + ": "+d.data.size+ "</span>" )
+      tooltip.style('left', xPosition + 'px')
+             .style('top', yPosition + 'px');
+      tooltip.style('display', 'inline-block')
+      tooltip.style('background-color',   colorScale(d.data.region))
+      .style('color', '#000')
+
+    })
+    .on('mousemove', function(event, d){
+        const xPosition = event.pageX + 10; 
+        const yPosition = event.pageY - 30; 
+        tooltip.style('left', xPosition + 'px')
+        .style('top', yPosition + 'px');
+      })
+      .on('mouseout', function() {
+        d3.select(this)
+        .style('stroke-width', 1);
+        tooltip.style('display', 'none');
+      })
 }
 
 
 function collectCheckedRegions() {
     checked_regions = []; 
-
     checkboxes.forEach((checkbox) => {
         if (checkbox.checked) {
             checked_regions.push(checkbox.getAttribute('value'));
         }
     });
-
-
    return checked_regions
 }
 
 
-function drawBeeswarmChart(year, x_axis_value, selectedSize, regions) {
+function drawBeeswarmChart() {
     
-    // let all_countries = []
-    // if(regions.length == 0){
-    //     // clearing everything if no region is selected
-    //     console.log('here')
-    //     const svg = d3.select("#svg-chart svg")
-    //     svg.selectAll('*').remove()
-    //     return
-    // }
-        
-    // regions.forEach(function(region){
-    //     all_countries.push(...region_to_countries[region])
-    // })
-
-    // let data = []
-    // let x_min=9999999999999999.0, x_max = -x_min;
-    // global_data.forEach(function(data_point){
-    //     //  calculate the x min max for each year
-
-    //     if( all_countries.includes(data_point['Country'])){
-    //         x_min = Math.min(x_min, parseFloat(data_point[x_axis_value]))
-    //         x_max = Math.max(x_max, parseFloat(data_point[x_axis_value]))
-    //         if(parseInt(data_point['Year'])==year ){
-    //         let object = {}
-    //         object['x'] = parseFloat(data_point[x_axis_value])
-    //         object['size'] = parseFloat(data_point[selectedSize])
-    //         object['country'] = data_point['Country']
-    //         object['region'] = country_to_region[data_point['Country']]
-    //         data.push(object)
-    //         }
-    //     }
-    // });
-
-    console.log(data)
 
     svg = d3.select("#svg-chart svg")
     svg.attr('width', width)
     svg.attr('height', height)
-
-    svg.selectAll('circle').remove();
-    svg.selectAll('.x-axis-line').remove();
-    svg.selectAll('.y-axis').remove();
-    svg.selectAll('g').remove();
-
-    svg.selectAll('*').remove()
-
     g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-
-    // let domain = [x_min - x_max*0.2, x_max*1.2]
-    // console.log('domain is : '+JSON.stringify(domain))
-    // const xScale = d3.scaleLinear()
-    //         .domain(domain)
-    //         .range([margin.left, width - margin.right]);
-    // const sizeScale = d3.scaleSqrt()
-    //     .domain([0, d3.max(data, d => parseFloat(d.size))])
-    //     .range([2, 20]); // Adjust the size range as needed
     const xAxis = d3.axisBottom(xScale);
     
-        // Append the x-axis to the chart
+    // Append the x-axis  and label to the chart
     svg.append('g')
     .attr('id', 'x-axis-line')
     .attr('class', 'x-axis-line')
@@ -334,16 +412,14 @@ function drawBeeswarmChart(year, x_axis_value, selectedSize, regions) {
     .attr('y', height - margin.bottom) 
     .text(x_axis_display);
 
-
     beeswarm = beeswarmForce()
                 .x(d => xScale(d.x))
                 .y(height / 3)
                 .r(d => sizeScale(d.size))
    
     let b_data = beeswarm(data)
-    console.log(b_data)
     g.selectAll('circle')
-            .data(b_data)
+            .data(b_data, d => d.data.country)
             // .enter()
             .join("circle")
             .attr("stroke", "black")
@@ -400,7 +476,7 @@ beeswarmForce = function(){
 function updateData(){
     data = []
     global_data.forEach(function(data_point){
-        if ( all_countries.includes(data_point['Country']) && parseInt(data_point['Year'])==year) {
+        if ( all_countries.has(data_point['Country']) && parseInt(data_point['Year'])==year) {
             let object = {}
             object['x'] = parseFloat(data_point[x_axis_value])
             object['size'] = parseFloat(data_point[selectedSize])
@@ -412,44 +488,108 @@ function updateData(){
     });
     sizeScale = d3.scaleSqrt()
     .domain([0, d3.max(data, d => parseFloat(d.size))])
-    .range([5, 30]);
-    // updateBeeSwarm();
+    .range([5, 20]);
     console.log('UpdateData(): Data and Size scale updated.')
 }
 
 function updateXminmax(){
-    x_min=9999999999999999.0;
+    x_min=Infinity;
     x_max = -x_min;
     global_data.forEach(function(data_point){
         //  calculate the x min max for each year
-        if( all_countries.includes(data_point['Country'])){
+        if( all_countries.has(data_point['Country'])){
             x_min = Math.min(x_min, parseFloat(data_point[x_axis_value]))
             x_max = Math.max(x_max, parseFloat(data_point[x_axis_value]))
         }});
+ 
     let domain = [x_min - x_max*0.2, x_max*1.2]
     console.log('Update x-axis domain is : '+JSON.stringify(domain))    
     xScale = d3.scaleLinear()
             .domain(domain)
             .range([margin.left, width - margin.right]);
-    // updateBeeSwarm();
 }
 
 function updateAllCountries(){
-    all_countries = []
-    if(checked_regions.length == 0){
-        // clearing everything if no region is selected
-        console.log('here')
-        const svg = d3.select("#svg-chart svg")
-        svg.selectAll('*').remove()
-        return
-    }
-    checked_regions.forEach(function(region){
-        all_countries.push(...region_to_countries[region])
+
+    let addedCountries=new Set(), removedCountries=new Set();
+    addedCheckboxes.forEach(function(region){
+        region_to_countries[region].forEach(item => {addedCountries.add(item);});
+    });
+
+    removedCheckboxes.forEach(function(region){
+        region_to_countries[region].forEach((item) => {removedCountries.add(item);});
     })
+  
+    all_countries = new Set([...all_countries].filter(d => !removedCountries.has(d)))
+    addedCountries.forEach(function(country){
+        all_countries.add(country)
+    })
+    console.log('Countries updated successfully')
 }
-// function updateBeeSwarm(){
-    beeswarm = beeswarmForce()
-    .x(d => xScale(d.x))
-    .y(height / 3)
-    .r(d => sizeScale(d.size))
-// }
+
+beeswarm = beeswarmForce()
+            .x(d => xScale(d.x))
+            .y(height / 3)
+            .r(d => sizeScale(d.size))
+
+function addToolTip(){
+
+}
+
+//  animation stuff you know ;)
+ var currently_playing = false;
+ var each_year_time;
+ 
+ function play_animation_pleaaaassssseeeee() {
+    currently_playing = true;
+    dispatchEventForYear();
+  
+    each_year_time = setInterval(function () {
+      year++; 
+      if (year <= 2013) {
+        dispatchEventForYear();
+        if (year == 2013){
+            togglePlayPause()
+        }
+      } else {
+      
+        stoooooopiiitttttttt();
+      }
+    }, 2000); 
+  }
+  
+  function dispatchEventForYear() {
+    console.log('Year is ' + year);
+    const slider = document.getElementById("slider");
+    slider.value = year;
+  
+    // Dispatch an input event to trigger the change
+    const inputEvent = new Event("input", {
+      bubbles: true,
+      cancelable: true,
+    });
+    slider.dispatchEvent(inputEvent);
+  }
+  
+  function stoooooopiiitttttttt() {
+    currently_playing = false;
+    clearInterval(each_year_time);
+  }
+  
+ function togglePlayPause() {
+   var playIcon = document.getElementById("playIcon");
+   var playText = document.getElementById("playText");
+ 
+   if (!currently_playing) {
+     play_animation_pleaaaassssseeeee();
+     playIcon.className = "fas fa-pause"; 
+     playText.textContent = "Pause";
+     currently_playing = true;
+   } else {
+     stoooooopiiitttttttt();
+     playIcon.className = "fas fa-play"; 
+     playText.textContent = "Play";
+     currently_playing = false;
+   }
+ }
+
