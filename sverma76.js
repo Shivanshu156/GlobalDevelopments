@@ -1,5 +1,6 @@
 var global_data;
 var country_data;
+var country_flags;
 var allChecked;
 var x_axis_value;
 var x_axis_display;
@@ -8,6 +9,7 @@ var checkboxes;
 var year = 1980;
 let region_to_countries = {};
 let country_to_region = {};
+let country_to_flag = {}
 var checked_regions
 let width = 1300;
 let height = 600;
@@ -24,11 +26,15 @@ let addedCheckboxes, removedCheckboxes;
 
 
 Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
-                d3.csv('data/countries_regions.csv', (d) => { return d  })  ])
+                d3.csv('data/countries_regions.csv', (d) => { return d  }),
+                d3.csv('data/Country_Flags.csv', (d) => { return d  })
+              ])
     .then(function (data) {
         console.log('loaded global_development.csv and countries_regions.csv');
         global_data = data[0];
         country_data = data[1];
+        country_flags = data[2];
+
         country_data.forEach(function(data){
             let region = data['World bank region'];
             let country = data['name'];
@@ -42,6 +48,12 @@ Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
             if(!(country in country_to_region))
                 country_to_region[country] = region });
         colorScale = d3.scaleOrdinal().domain(Object.keys(region_to_countries)).range(d3.schemeCategory10);
+
+        country_flags.forEach(function(data){
+            let country = data['Country'];
+            country_to_flag[country] = data['ImageURL']
+        });
+
         $(document).ready(function() {
 
             // $('[x-axis-nav-value="Data.Health.Birth Rate"]').click();
@@ -356,8 +368,8 @@ function updateChart(change) {
       const xPosition = event.pageX + 10; 
       const yPosition = event.pageY - 30; 
       console.log(d)
-      tooltip.html("<span> Country: " + d.data.country + " <br>" + 
-      x_axis_value + ": "+d.data.x +" <br>" +selectedSize + ": "+d.data.size+ "</span>" )
+      tooltip.html("<div><img src='"+country_to_flag[d.data.country]+"' alt='Image' style='border: 2px solid #000; width: 50px; height: 50px;'><span> Country: " + d.data.country + " <br>" + 
+      x_axis_value + ": "+d.data.x +" <br>" +selectedSize + ": "+d.data.size+ "</span></div>" )
       tooltip.style('left', xPosition + 'px')
              .style('top', yPosition + 'px');
       tooltip.style('display', 'inline-block')
