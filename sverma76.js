@@ -11,19 +11,28 @@ let region_to_countries = {};
 let country_to_region = {};
 let country_to_flag = {}
 var checked_regions
-let width = 1300;
+let beeswarm_width = 700;
+// let width_percent = '160%';
 let height = 600;
+// let height_percent = '170%'
 let colorScale;
-let margin = { top: 40, right: 40, bottom: 40, left: 40 };
+let margin = { top: 40, right: 40, bottom: 40, left: 80 };
 let data = []
 let all_countries = new Set()
 let xScale;
 let sizeScale;
-let svg, g;
+let beeswarm_svg, g;
 let beeswarm;
 let remaining_data;
 let addedCheckboxes, removedCheckboxes;
+let circleMax = 15, circleMin = 3;
+let legend;
+let circleSizes, circleSizesDomain;
+let minSizeDomain, maxSizeDomain;
+const circleSpacing = 150; 
+let innerPadding = 0.7;
 
+const labels = ["Smallest", "Medium", "Largest"]; 
 
 Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
                 d3.csv('data/countries_regions.csv', (d) => { return d  }),
@@ -137,6 +146,15 @@ document.addEventListener("DOMContentLoaded", function () {
     updateChart(change='region');
     }
 
+    // Select and show selected boxplot attribute value
+    document.querySelectorAll('.boxplot-nav').forEach(function (item) {   
+        item.addEventListener('click', function () {
+        x_axis_value = item.getAttribute('boxplot-nav-value');
+        x_axis_display = item.textContent
+        document.getElementById('boxplot-nav-selected').textContent = x_axis_display;
+        // updateChart('x-axis');
+        });
+    });
 
     // Select and show selected year value
     var yearInput = document.getElementById("year-input");
@@ -206,16 +224,17 @@ function updateChart(change) {
         updateAllCountries();
         updateXminmax();
         updateData();
-
+        console.log('these checkboxes are removed')
+        console.log(removedCheckboxes)
         // update min max axis
-        svg.select(".x-axis-line")
+        beeswarm_svg.select(".x-axis-line")
         .transition()
         .duration(1000) 
         .call(d3.axisBottom(xScale))
 
         // fade old countries data and adjust beeswarm chart
         if(removedCheckboxes.size){
-        d3.selectAll('circle').filter(function() {
+        g.selectAll('circle').filter(function() {
             return removedCheckboxes.has(d3.select(this).data()[0].data.region); })
             .transition()
             .duration(1000) 
@@ -223,10 +242,10 @@ function updateChart(change) {
             .style('stroke-width', 0)
             .remove()
             .on('end', function(){
-                if (d3.selectAll('circle').filter(function() {
+                if (g.selectAll('circle').filter(function() {
                     return removedCheckboxes.has(d3.select(this).data()[0].data.region);
                   }).empty()) {
-                remaining_data = d3.selectAll('circle').data().map(d=>d.data)
+                remaining_data = g.selectAll('circle').data().map(d=>d.data)
                 console.log('remaining data is')
                 console.log(remaining_data)
                 let b_remaining_data = beeswarm(remaining_data)
@@ -297,17 +316,17 @@ function updateChart(change) {
     }else if(change=='x-axis'){
         console.log('x-axis change event occured')
         updateXminmax();
-        svg.selectAll('.x-axis-title')
+        beeswarm_svg.selectAll('.x-axis-title')
             .transition()
             .duration(1000)
             .style("opacity", 0)
             .on('end', function () {
-                svg.select(".x-axis-line")
+                beeswarm_svg.select(".x-axis-line")
                 .transition()
                 .duration(1000) 
                 .call(d3.axisBottom(xScale))
                 .on('end', function(){
-                    svg.select('.x-axis-title')
+                    beeswarm_svg.select('.x-axis-title')
                     .transition()
                     .duration(1000)
                     .text(x_axis_display)
@@ -405,28 +424,31 @@ function collectCheckedRegions() {
 function drawBeeswarmChart() {
     
 
-    svg = d3.select("#svg-chart svg")
-    svg.attr('width', width)
-    svg.attr('height', height)
-    g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
+    beeswarm_svg = d3.select("#svg-chart .beeswarm")
+    const container = document.getElementById('container')
+    beeswarm_svg.attr('width', beeswarm_width)
+    beeswarm_svg.attr('height', height)
+
+    console.log('height is '+height+'width is '+ beeswarm_width)
+    g = beeswarm_svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`);
 
     const xAxis = d3.axisBottom(xScale);
     
     // Append the x-axis  and label to the chart
-    svg.append('g')
+    beeswarm_svg.append('g')
     .attr('id', 'x-axis-line')
     .attr('class', 'x-axis-line')
     .attr('transform', `translate(0, ${height- 2*margin.bottom})`)
     .call(xAxis);
-    svg.append('text')
+    beeswarm_svg.append('text')
     .attr('class', 'x-axis-title') 
-    .attr('x', width / 2) 
+    .attr('x', beeswarm_width / 2) 
     .attr('y', height - margin.bottom) 
     .text(x_axis_display);
 
     beeswarm = beeswarmForce()
                 .x(d => xScale(d.x))
-                .y(height / 3)
+                .y(height / 2.5)
                 .r(d => sizeScale(d.size))
    
     let b_data = beeswarm(data)
@@ -442,6 +464,47 @@ function drawBeeswarmChart() {
             .style('fill', d => colorScale(d.data.region))
             .style('stroke', 'black')
             .style('stroke-width', 1);
+
+    // key for beeswarm
+
+    legend = beeswarm_svg.append("g")
+    .attr("class", "legend")
+    .attr("transform", "translate("+margin.left+","+5+" )");
+    
+    legend.append("rect")
+    .attr("width", beeswarm_width-margin.left-margin.right) 
+    .attr("height", 50) 
+    .attr("fill", "#D6CC99")
+    .attr("stroke", "#445D48") 
+    .attr("stroke-width", 1) 
+    .attr('class', 'navbar navbar-expand-lg navbar-dark bg-dark')
+    .style('fill-opacity', 1)
+
+    legend.selectAll("circle")
+    .data(circleSizes)
+    .enter()
+    .append("circle")
+    .attr("cx", (d, i) => (i +innerPadding) * circleSpacing + d)
+    .attr("cy", 25)
+    .attr("r", d=>d)
+    .style("fill", "#445D48")
+    .style('stroke', 'black'); 
+
+    legend.selectAll("text")
+    .data(labels)
+    .attr('class', 'label-value')
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => (i+innerPadding) * circleSpacing + 3*circleSizes[i])
+    .attr("y", 30)
+    .style('fill', '#445D48')
+    .text((d, i)=> circleSizesDomain[i])    ;
+
+    legend.append("text")
+    .attr("x", 15) // Adjust the position as needed
+    .attr("y", 30)
+    .style("fill", "#445D48")
+    .text("Size:");
 
 }
 
@@ -498,10 +561,39 @@ function updateData(){
             
         }
     });
+    console.log('data is')
+    console.log(data)
+  if (data.length){
+    minSizeDomain = d3.min(data, d => parseFloat(d.size))
+    maxSizeDomain = d3.max(data, d => parseFloat(d.size))
+
+    // updating size scale
     sizeScale = d3.scaleSqrt()
-    .domain([0, d3.max(data, d => parseFloat(d.size))])
-    .range([5, 20]);
+    .domain([minSizeDomain, maxSizeDomain])
+    .range([circleMin, circleMax]);
     console.log('UpdateData(): Data and Size scale updated.')
+    circleSizes = [circleMin, (circleMin+circleMax)/2, circleMax]
+    circleSizesDomain = [minSizeDomain.toFixed(2), ((minSizeDomain+maxSizeDomain)/2).toFixed(2), maxSizeDomain.toFixed(2)]
+
+    legend.selectAll('text')
+            .filter(function () {
+                return this.textContent !== "Size:";
+                    })
+            .transition()
+            .duration(1000)
+            .style("opacity", 0)
+            .on('end', function () {
+                legend.selectAll("text")
+                .filter(function () {
+                    return this.textContent !== "Size:";
+                        })
+                .transition()
+                .duration(1000) 
+                .attr("x", (d, i) => (i + innerPadding) * circleSpacing + 3*circleSizes[i])
+                .text((d, i)=> circleSizesDomain[i] )
+                .style("opacity", 1);
+                });
+            }
 }
 
 function updateXminmax(){
@@ -514,11 +606,11 @@ function updateXminmax(){
             x_max = Math.max(x_max, parseFloat(data_point[x_axis_value]))
         }});
  
-    let domain = [x_min - x_max*0.2, x_max*1.2]
+    let domain = [x_min - x_max*0.2, x_max*1.4]
     console.log('Update x-axis domain is : '+JSON.stringify(domain))    
     xScale = d3.scaleLinear()
             .domain(domain)
-            .range([margin.left, width - margin.right]);
+            .range([margin.left, beeswarm_width - margin.right]);
 }
 
 function updateAllCountries(){
