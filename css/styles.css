@@ -1,150 +1,132 @@
-/* #control_panel{
-    background-color:cadetblue;
-    border: 1;
-    border-color: black;
-
-} */
-
-/* Add your dropdown styles here */
 .region {
-    position: relative;
-    display: inline-block;
-  }
-  
+  position: relative;
+  display: inline-block;
+}
 
-  
-  .region-dropdown {
-    display: none;
-    position: absolute;
-    background-color: #f1f1f1;
-    min-width: 160px;
-    border: 1px solid #ddd;
-    z-index: 1;
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  
-  label {
-    display: block;
-    padding: 5px;
-    font-size: large;
-  }
-  
-  label:hover {
-    background-color: #ddd;
-  }
-  
-.text{
+
+
+.region-dropdown {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  border: 1px solid #ddd;
+  z-index: 1;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+label {
+  display: block;
+  padding: 5px;
+  font-size: large;
+}
+
+label:hover {
+  background-color: #ddd;
+}
+
+.text {
   margin-top: 3px;
 
-    font-size: small;
-    text-align: center;
-    align-items: center;
+  font-size: small;
+  text-align: center;
+  align-items: center;
 }
-.dropdown-toggle{
-    font-size: medium;
-    text-align: center;
-    align-items: center;
-    padding: auto;
+
+.dropdown-toggle {
+  font-size: medium;
+  text-align: center;
+  align-items: center;
+  padding: auto;
 }
 
 input[type="range"] {
-    width: 150px;
-    margin: 3px 10px;
-  }
-  input[type="text"] {
-    width: 50px;
-    margin: 3px 3px;
-  }
+  width: 150px;
+  margin: 3px 10px;
+}
 
-  #slider-value {
-  
-    font-size: 18px;
-  }
-  .nav-item {
-    margin-top: 15px;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
-  .nav-option {
-    margin-top: -15px;
-    margin-left: 2px;
-    margin-right: 2px;
-  }
+input[type="text"] {
+  width: 50px;
+  margin: 3px 3px;
+}
 
-  .play-button{
-    margin-bottom: 10px;
-  }
-  .text-input{
-    width: 80px;
-    text-align: center;
-  }
+#slider-value {
 
-  #playButton{
-    margin-top: 5px;
-  }
+  font-size: 18px;
+}
 
-  .navbar-collapse{
-    height: 40px;
-  }
-  
-  .boxplot-container { 
-    border: 2px solid #445D48;
-    margin-top: -40px;
-    fill: #445D48;
-    /* stroke: "#445D48"; */
-  }
+.nav-item {
+  margin-top: 15px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
 
-  .chart-container{
-    display: flex;
-    flex-direction: row;
-    font-size: 0;
-  }
+.nav-option {
+  margin-top: -15px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
 
-  .beeswarm-container {
+.play-button {
+  margin-bottom: 10px;
+}
 
-  box-sizing: border-box; 
+.text-input {
+  width: 80px;
+  text-align: center;
+}
 
-  align-items: center;
-  flex-direction: column; /* Stack content vertically */
-  justify-content: center;
-  }
+#playButton {
+  margin-top: 5px;
+}
 
-  .boxplot-container {
-    /* width: 500;  */
-    flex: 1;
-  border: 1px solid #000; 
-   padding: 10px; 
+.navbar-collapse {
+  height: 40px;
+}
+
+
+#chart-container {
   display: flex;
-  flex-direction: column;
-  width: 500; 
-  border: 1px solid #000; 
-  padding: 10px; 
-  box-sizing: border-box; 
-  font-size: 16px;
-  justify-content: center;
-   margin-left: 50px;
-   margin-top: 50px;
-   align-items: center;
-  }  
+  width: 1300px;
+  height: 500px;
+  overflow-x: auto;
+}
 
+.beeswarm-container,
+.boxplot-container {
+  width: 700px;
+  height: 100%;
+  padding: 10px;
+}
+
+.beeswarm-container {
+  background-color: white;
+}
+
+.boxplot-container {
+  background-color: white;
+  flex-direction: column;
+
+}
 
 .boxplot {
-    display: flex;
-}
-.box {
-    /* fill: none; */
-    stroke: black;
-}
-.whisker {
-    stroke: black;
-}
-.median-line {
-    stroke: black;
+  display: flex;
 }
 
-.boxplot-text{
+.box {
+  stroke: black;
+}
+
+.whisker {
+  stroke: black;
+}
+
+.median-line {
+  stroke: black;
+}
+
+.boxplot-text {
   font-size: 12px;
   text-anchor: middle;
 }
-

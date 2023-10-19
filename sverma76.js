@@ -30,7 +30,7 @@ let circleSizes, circleSizesDomain;
 let minSizeDomain, maxSizeDomain;
 const circleSpacing = 150; 
 let innerPadding = 0.7;
-let boxplot_height = 500, boxplot_width = 500;
+// let boxplot_height = 500, boxplot_width = 500;
 let boxplotContainer, boxplotTooltip;
 
 
@@ -583,7 +583,7 @@ function drawBoxplots(){
   function drawBoxPlot(key, boxplotData) {
     boxplotContainer = d3.select(".boxplot-container");
 
-    // Calculate box plot statistics (min, max, quartiles, median)
+
     const min = d3.min(boxplotData);
     const max = d3.max(boxplotData);
     const q1 = d3.quantile(boxplotData, 0.25);
@@ -598,14 +598,11 @@ function drawBoxplots(){
         .on("mouseout", hideTooltip)
         .on('mousemove', (event, d)=>moveTooltip(event))
 
-    // Define your x-scale for the box plot
+
     const xScaleBoxplot = d3.scaleLinear()
         .domain([d3.min(boxplotData), d3.max(boxplotData)])
         .range([boxMargin.left, boxplotWidth - boxMargin.right]);
 
-
-
-    // Draw the box (box plot)
     boxplotSvg.append("rect")
         .attr("x", xScaleBoxplot(q1))
         .attr("y", boxMargin.top)
@@ -614,7 +611,6 @@ function drawBoxplots(){
         .attr("class", "box")
         .style("fill", colorScale(key));
 
-    // Draw lines for whiskers and median
     boxplotSvg.selectAll(".whisker")
         .data([min, max])
         .enter().append("line")
@@ -645,7 +641,7 @@ function drawBoxplots(){
         .attr("y1", (boxplotHeight - boxMargin.bottom + boxMargin.top)/2)
         .attr("y2", (boxplotHeight - boxMargin.bottom + boxMargin.top)/2)
         .attr("class", "median-line");
-        // Add labels for box plot quartiles, median, and whiskers
+
     boxplotSvg.append("text")
         .attr("class", "boxplot-text")
         .attr("x", xScaleBoxplot(q1))
@@ -693,10 +689,7 @@ function showTooltip(key, min, q1, median, q3, max, event) {
   boxplotTooltip.html(`<strong>${key}</strong><br>Attribute: ${boxplot_value}<br>Min: ${min}<br>Q1: ${q1}<br>Median: ${median}<br>Q3: ${q3}<br>Max: ${max}`)
       .style("left", (event.pageX) + "px")
       .style("top", (event.pageY) + "px")
-      .style("display", "block")
-
-
-;
+      .style("display", "block");
 }
 
 function hideTooltip() {
@@ -704,7 +697,6 @@ function hideTooltip() {
 }
 
 function moveTooltip(event){
-  
     const xPosition = event.pageX + 10; 
     const yPosition = event.pageY - 30; 
     boxplotTooltip.style('left', xPosition + 'px')
