@@ -2,8 +2,8 @@ var global_data;
 var country_data;
 var country_flags;
 var allChecked;
-var x_axis_value;
-var x_axis_display;
+var x_axis_value, boxplot_value;
+var x_axis_display, boxplot_display;
 var selectedSize;
 var checkboxes;
 var year = 1980;
@@ -12,12 +12,11 @@ let country_to_region = {};
 let country_to_flag = {}
 var checked_regions
 let beeswarm_width = 700;
-// let width_percent = '160%';
-let height = 600;
-// let height_percent = '170%'
+let height = 500;
 let colorScale;
-let margin = { top: 40, right: 40, bottom: 40, left: 80 };
+let margin = { top: 0, right: 40, bottom: 40, left: 20 };
 let data = []
+let boxplot_data;
 let all_countries = new Set()
 let xScale;
 let sizeScale;
@@ -31,6 +30,9 @@ let circleSizes, circleSizesDomain;
 let minSizeDomain, maxSizeDomain;
 const circleSpacing = 150; 
 let innerPadding = 0.7;
+let boxplot_height = 500, boxplot_width = 500;
+let boxplotContainer, boxplotTooltip;
+
 
 const labels = ["Smallest", "Medium", "Largest"]; 
 
@@ -70,10 +72,10 @@ Promise.all([d3.csv('data/global_development.csv', (d) => { return d  }),
             $('[size-value="Data.Health.Death Rate"]').click();
             $('[year-value=1980]').click();
             $('#selectAll').click();
-
+            $('[boxplot-nav-value="Data.Health.Death Rate"]').click();
+            
 
             drawBeeswarmChart();
-
             updateChart()
           });
 });
@@ -149,10 +151,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Select and show selected boxplot attribute value
     document.querySelectorAll('.boxplot-nav').forEach(function (item) {   
         item.addEventListener('click', function () {
-        x_axis_value = item.getAttribute('boxplot-nav-value');
-        x_axis_display = item.textContent
-        document.getElementById('boxplot-nav-selected').textContent = x_axis_display;
+        boxplot_value = item.getAttribute('boxplot-nav-value');
+        boxplot_display = item.textContent
+        document.getElementById('boxplot-nav-selected').textContent = boxplot_display;
         // updateChart('x-axis');
+        updateChart(change='boxplot-attribute')
         });
     });
 
@@ -197,7 +200,8 @@ document.addEventListener("DOMContentLoaded", function () {
 function updateChart(change) {
     if(change=='year'){
         console.log('Year change event occured')
-        d3.selectAll('#tooltip').remove()
+        d3.selectAll('#beeswarmTooltip').remove()
+        d3.selectAll('#boxplotTooltip').remove()
         updateData()
 
         let b_data = beeswarm(data)
@@ -217,7 +221,12 @@ function updateChart(change) {
                 .style('fill', d => colorScale(d.data.region))
 
                 .delay(function(d,i){return(i*5)})   
-        addToolTip()         
+        // addToolTip()  
+        
+        updateBoxplotData()
+      // Some stuff to update boxplots using animations or something
+      d3.selectAll('.sub-box').remove()
+      drawBoxplots()
         }
     else if(change=='region') {
         console.log('region change event occured')
@@ -310,7 +319,11 @@ function updateChart(change) {
                 })
         }
 
-        addToolTip()         
+        // addToolTip()         
+        updateBoxplotData()
+      // Some stuff to update boxplots using animations or something
+      d3.selectAll('.sub-box').remove()
+      drawBoxplots()
 
 
     }else if(change=='x-axis'){
@@ -368,9 +381,18 @@ function updateChart(change) {
         addToolTip()         
     
 
+    }else if(change=='boxplot-attribute'){
+      console.log('Boxplot attribute change event occured')
+      updateBoxplotData()
+      // Some stuff to update boxplots using animations or something
+      d3.selectAll('.sub-box').remove()
+      drawBoxplots()
     }
-    const tooltip = d3.select("body").append("div")
-    .attr("id", "tooltip")
+
+
+
+    const beeswarmTooltip = d3.select("body").append("div")
+    .attr("id", "beeswarmTooltip")
     .style("position", "absolute")
     // .style("background-color", "white")
     .style("border", "2px solid black")
@@ -387,26 +409,69 @@ function updateChart(change) {
       const xPosition = event.pageX + 10; 
       const yPosition = event.pageY - 30; 
       console.log(d)
-      tooltip.html("<div><img src='"+country_to_flag[d.data.country]+"' alt='Image' style='border: 2px solid #000; width: 50px; height: 50px;'><span> Country: " + d.data.country + " <br>" + 
+      beeswarmTooltip.html("<div><img src='"+country_to_flag[d.data.country]+"' alt='Image' style='border: 2px solid #000; width: 50px; height: 50px;'><span> Country: " + d.data.country + " <br>" + 
       x_axis_value + ": "+d.data.x +" <br>" +selectedSize + ": "+d.data.size+ "</span></div>" )
-      tooltip.style('left', xPosition + 'px')
+      beeswarmTooltip.style('left', xPosition + 'px')
              .style('top', yPosition + 'px');
-      tooltip.style('display', 'inline-block')
-      tooltip.style('background-color',   colorScale(d.data.region))
+      beeswarmTooltip.style('display', 'inline-block')
+      beeswarmTooltip.style('background-color',   colorScale(d.data.region))
       .style('color', '#000')
 
     })
     .on('mousemove', function(event, d){
         const xPosition = event.pageX + 10; 
         const yPosition = event.pageY - 30; 
-        tooltip.style('left', xPosition + 'px')
+        beeswarmTooltip.style('left', xPosition + 'px')
         .style('top', yPosition + 'px');
       })
       .on('mouseout', function() {
         d3.select(this)
         .style('stroke-width', 1);
-        tooltip.style('display', 'none');
+        beeswarmTooltip.style('display', 'none');
       })
+
+
+
+// Tooltip for boxplot charts
+      // const boxplotTooltip = d3.select("body").append("div")
+      // .attr("id", "boxplotTooltip")
+      // .style("position", "absolute")
+      // .style("border", "2px solid black")
+      // .style("padding", "5px")
+      // .style("opacity", 0.9)
+      // .style("display", "none");
+  
+      // d3.selectAll('.sub-box')
+      // .on('mouseover', function(event,d){
+      //   d3.select(this)
+      // //   .attr('stroke-width', 4)
+      //   .style('stroke-width', 4)
+        
+      //   const xPosition = event.pageX + 10; 
+      //   const yPosition = event.pageY - 30; 
+      //   console.log("tooltip data is : ")
+      //   console.log(d)
+      //   // beeswarmTooltip.html("<div><img src='"+country_to_flag[d.data.country]+"' alt='Image' style='border: 2px solid #000; width: 50px; height: 50px;'><span> Country: " + d.data.country + " <br>" + 
+      //   // x_axis_value + ": "+d.data.x +" <br>" +selectedSize + ": "+d.data.size+ "</span></div>" )
+      //   boxplotTooltip.html("<div>Hello</div>")
+      //   boxplotTooltip.style('left', xPosition + 'px')
+      //          .style('top', yPosition + 'px');
+      //   boxplotTooltip.style('display', 'inline-block')
+      //   // beeswarmTooltip.style('background-color',   colorScale(d.data.region))
+      //   // .style('color', '#000')
+  
+      // })
+      // .on('mousemove', function(event, d){
+      //     const xPosition = event.pageX + 10; 
+      //     const yPosition = event.pageY - 30; 
+      //     boxplotTooltip.style('left', xPosition + 'px')
+      //     .style('top', yPosition + 'px');
+      //   })
+      //   .on('mouseout', function() {
+      //     d3.select(this)
+      //     .style('stroke-width', 1);
+      //     boxplotTooltip.style('display', 'none');
+      //   })
 }
 
 
@@ -424,8 +489,7 @@ function collectCheckedRegions() {
 function drawBeeswarmChart() {
     
 
-    beeswarm_svg = d3.select("#svg-chart .beeswarm")
-    const container = document.getElementById('container')
+    beeswarm_svg = d3.select(".beeswarm-container").append('svg').attr("class", 'beeswarm-svg')
     beeswarm_svg.attr('width', beeswarm_width)
     beeswarm_svg.attr('height', height)
 
@@ -477,8 +541,8 @@ function drawBeeswarmChart() {
     .attr("fill", "#D6CC99")
     .attr("stroke", "#445D48") 
     .attr("stroke-width", 1) 
-    .attr('class', 'navbar navbar-expand-lg navbar-dark bg-dark')
-    .style('fill-opacity', 1)
+    // .attr('class', 'navbar navbar-expand-lg navbar-dark bg-dark')
+    .style('opacity', 1)
 
     legend.selectAll("circle")
     .data(circleSizes)
@@ -505,6 +569,155 @@ function drawBeeswarmChart() {
     .attr("y", 30)
     .style("fill", "#445D48")
     .text("Size:");
+
+}
+
+
+function drawBoxplots(){
+  console.log('inside drawboxplots')
+
+  const boxplotWidth = 500; 
+  const boxplotHeight = 70; 
+  const boxMargin = { top: 10, right: 20, bottom: 30, left: 10 }; 
+
+  function drawBoxPlot(key, boxplotData) {
+    boxplotContainer = d3.select(".boxplot-container");
+
+    // Calculate box plot statistics (min, max, quartiles, median)
+    const min = d3.min(boxplotData);
+    const max = d3.max(boxplotData);
+    const q1 = d3.quantile(boxplotData, 0.25);
+    const median = d3.median(boxplotData);
+    const q3 = d3.quantile(boxplotData, 0.75);
+    
+    const boxplotSvg = boxplotContainer.append("svg")
+        .attr("width", boxplotWidth)
+        .attr("height", boxplotHeight)
+        .attr("class", "sub-box")
+        .on("mouseover", (event, d) => showTooltip(key, min, q1, median, q3, max, event))
+        .on("mouseout", hideTooltip)
+        .on('mousemove', (event, d)=>moveTooltip(event))
+
+    // Define your x-scale for the box plot
+    const xScaleBoxplot = d3.scaleLinear()
+        .domain([d3.min(boxplotData), d3.max(boxplotData)])
+        .range([boxMargin.left, boxplotWidth - boxMargin.right]);
+
+
+
+    // Draw the box (box plot)
+    boxplotSvg.append("rect")
+        .attr("x", xScaleBoxplot(q1))
+        .attr("y", boxMargin.top)
+        .attr("width", xScaleBoxplot(q3) - xScaleBoxplot(q1))
+        .attr("height", boxplotHeight - boxMargin.top - boxMargin.bottom)
+        .attr("class", "box")
+        .style("fill", colorScale(key));
+
+    // Draw lines for whiskers and median
+    boxplotSvg.selectAll(".whisker")
+        .data([min, max])
+        .enter().append("line")
+        .attr("x1", d => xScaleBoxplot(d))
+        .attr("x2", d => xScaleBoxplot(d))
+        .attr("y1", boxMargin.top)
+        .attr("y2", boxplotHeight - boxMargin.bottom)
+        .attr("class", "whisker");
+
+    boxplotSvg.append("line")
+        .attr("x1", xScaleBoxplot(median))
+        .attr("x2", xScaleBoxplot(median))
+        .attr("y1", boxMargin.top)
+        .attr("y2", boxplotHeight - boxMargin.bottom)
+        .attr("class", "median-line");
+
+
+    boxplotSvg.append("line")
+        .attr("x1", xScaleBoxplot(min))
+        .attr("x2", xScaleBoxplot(q1))
+        .attr("y1", (boxplotHeight - boxMargin.bottom)/2 + boxMargin.top/2)
+        .attr("y2", (boxplotHeight - boxMargin.bottom)/2 + boxMargin.top/2)
+        .attr("class", "median-line");
+
+    boxplotSvg.append("line")
+        .attr("x1", xScaleBoxplot(q3))
+        .attr("x2", xScaleBoxplot(max))
+        .attr("y1", (boxplotHeight - boxMargin.bottom + boxMargin.top)/2)
+        .attr("y2", (boxplotHeight - boxMargin.bottom + boxMargin.top)/2)
+        .attr("class", "median-line");
+        // Add labels for box plot quartiles, median, and whiskers
+    boxplotSvg.append("text")
+        .attr("class", "boxplot-text")
+        .attr("x", xScaleBoxplot(q1))
+        .attr("y", boxplotHeight - boxMargin.bottom + 20)
+        .text("Q1");
+
+    boxplotSvg.append("text")
+        .attr("class", "boxplot-text")
+        .attr("x", xScaleBoxplot(median))
+        .attr("y", boxplotHeight - boxMargin.bottom + 20)
+        .text("Median");
+
+    boxplotSvg.append("text")
+    .attr("class", "boxplot-text")
+
+        .attr("x", xScaleBoxplot(q3))
+        .attr("y", boxplotHeight - boxMargin.bottom + 20)
+        .text("Q3");
+
+    boxplotSvg.append("text")
+    .attr("class", "boxplot-text")
+
+        .attr("x", xScaleBoxplot(min))
+        .attr("y", boxplotHeight - boxMargin.bottom + 20)
+        .text("Min");
+
+    boxplotSvg.append("text")
+    .attr("class", "boxplot-text")
+
+        .attr("x", xScaleBoxplot(max))
+        .attr("y", boxplotHeight - boxMargin.bottom + 20)
+        .text("Max");
+}
+
+function showTooltip(key, min, q1, median, q3, max, event) {
+  console.log('inside show tool tip')
+       boxplotTooltip = d3.select("body").append("div")
+      .attr("id", "boxplotTooltip")
+      .style("position", "absolute")
+      .style("border", "2px solid black")
+      .style("padding", "5px")
+      .style("opacity", 1)
+      .style("background-color", colorScale(key))
+      .style("display", "none");
+  boxplotTooltip.html(`<strong>${key}</strong><br>Attribute: ${boxplot_value}<br>Min: ${min}<br>Q1: ${q1}<br>Median: ${median}<br>Q3: ${q3}<br>Max: ${max}`)
+      .style("left", (event.pageX) + "px")
+      .style("top", (event.pageY) + "px")
+      .style("display", "block")
+
+
+;
+}
+
+function hideTooltip() {
+  boxplotTooltip.style("display", "none");
+}
+
+function moveTooltip(event){
+  
+    const xPosition = event.pageX + 10; 
+    const yPosition = event.pageY - 30; 
+    boxplotTooltip.style('left', xPosition + 'px')
+    .style('top', yPosition + 'px');
+
+}
+
+for (const key in boxplot_data) {
+    if (boxplot_data.hasOwnProperty(key)) {
+        drawBoxPlot(key, boxplot_data[key]);
+    }
+}
+
 
 }
 
@@ -606,7 +819,7 @@ function updateXminmax(){
             x_max = Math.max(x_max, parseFloat(data_point[x_axis_value]))
         }});
  
-    let domain = [x_min - x_max*0.2, x_max*1.4]
+    let domain = [x_min - x_max*0.3, x_max*1.4]
     console.log('Update x-axis domain is : '+JSON.stringify(domain))    
     xScale = d3.scaleLinear()
             .domain(domain)
@@ -631,6 +844,22 @@ function updateAllCountries(){
     console.log('Countries updated successfully')
 }
 
+function updateBoxplotData(){
+  boxplot_data = {}
+  global_data.forEach(function(data_point){
+      if ( all_countries.has(data_point['Country']) && parseInt(data_point['Year'])==year) {
+
+          if(!boxplot_data.hasOwnProperty(country_to_region[data_point['Country']]))
+            boxplot_data[country_to_region[data_point['Country']]] = []
+          
+          boxplot_data[country_to_region[data_point['Country']]].push(parseFloat(data_point[boxplot_value]))
+          
+      }
+  });
+  console.log('Boxplot Data is updated and new boxplot_data is')
+  console.log(boxplot_data)
+
+}
 beeswarm = beeswarmForce()
             .x(d => xScale(d.x))
             .y(height / 3)
