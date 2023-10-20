@@ -88,25 +88,32 @@ input[type="text"] {
 
 #chart-container {
   display: flex;
-  width: 1300px;
-  height: 500px;
+  width: 1500px;
+  height: 700px;
   overflow-x: auto;
+  overflow-y: auto;
+}
+
+.select-deselect-all {
+  display: flex;
 }
 
 .beeswarm-container,
 .boxplot-container {
-  width: 700px;
-  height: 100%;
+  /* width: 750px; */
+  height: 700px;
   padding: 10px;
 }
 
 .beeswarm-container {
   background-color: white;
+  width: 800px;
 }
 
 .boxplot-container {
   background-color: white;
   flex-direction: column;
+  width: 500px;
 
 }
 
@@ -129,4 +136,38 @@ input[type="text"] {
 .boxplot-text {
   font-size: 12px;
   text-anchor: middle;
+  padding: 5px;
+}
+
+.boxplot-text-max {
+  font-size: 12px;
+  text-anchor: start;
+  padding: 5px;
+}
+
+.boxplot-text-min {
+  font-size: 12px;
+  text-anchor:end;
+  padding: 5px;
+}
+
+.region-menu, #checkbox-div{
+  background-color: rgba(255,255, 255, 0.9);
+  font-size: small;
+  /* color: white; */
+  padding: auto;
+}
+
+.select-deselect-all {
+  opacity: 1;
+  background-color: black;
+}
+
+.dropdown-item .btn{
+  height: 30px;
+  font-size: small;
+}
+
+.boxplot-title{
+  text-align: left;
 }

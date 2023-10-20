@@ -37,6 +37,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto  mb-lg-4">
 
+
+
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
@@ -120,41 +122,7 @@
                             <a class="nav-link active text" aria-current="page"><span id="size-selected"></span></a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button"
-                                data-toggle="dropdown" aria-expanded="false">
-                                Regions
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" id="selectAll"> Select All
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="south_asia" value="South Asia"> South Asia
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="europe" value = "Europe & Central Asia"> Europe & Central Asia
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="middle_east" value ="Middle East & North Africa" > Middle East & North
-                                    Africa
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="sub-saharan" value = "Sub-Saharan Africa"> Sub-Saharan Africa
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="latin" value = "Latin America & Caribbean"> Latin America & Caribbean
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="north_america" value = "North America"> North America
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <input type="checkbox" class="checkbox-item" id="east_asia" value = "East Asia & Pacific"> East Asia & Pacific
-                                </a>
 
-                            </div>
-                        </li>
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -198,6 +166,44 @@
                             <!-- <a class="nav-link active text" aria-current="page"><span id="boxplot-nav-selected"></span></a> -->
                             <a class="nav-link active text" aria-current="page" id="boxplot-nav-selected"></a>
                         </li>
+
+                        <li class="nav-item">
+                                <a class="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button"
+                                    data-toggle="dropdown" aria-expanded="false">
+                                    Regions
+                                </a>
+                                <div class="dropdown-menu region-menu" aria-labelledby="dropdownMenuButton">
+                                    <div class="select-deselect-all top-part">
+                                            <a class="dropdown-item" href="#"><button type="button" class="btn btn-success" id="selectAll"> Select All </button></a>
+                                            <a class="dropdown-item" href="#"><button type="button" class="btn btn-danger" id="deselectAll"> Deselect All </button></a>
+                                    </div>
+                                    <!-- <div class="dropdown-divider"></div> -->
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #1f77b4;">
+                                        <input type="checkbox" class="checkbox-item" id="south_asia" value="South Asia" > South Asia 
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #ff7f0e;">
+                                        <input type="checkbox" class="checkbox-item" id="europe" value = "Europe & Central Asia"> Europe & Central Asia
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #2ca02c;">
+                                        <input type="checkbox" class="checkbox-item" id="middle_east" value ="Middle East & North Africa" > Middle East & North
+                                        Africa
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #d62728;">
+                                        <input type="checkbox" class="checkbox-item" id="sub-saharan" value = "Sub-Saharan Africa"> Sub-Saharan Africa
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #9467bd;">
+                                        <input type="checkbox" class="checkbox-item" id="latin" value = "Latin America & Caribbean"> Latin America & Caribbean
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #e377c2;">
+                                        <input type="checkbox" class="checkbox-item" id="north_america" value = "North America"> North America
+                                    </a>
+                                    <a class="dropdown-item region-item" id="checkbox-div" style="color: #8c564b;">
+                                        <input type="checkbox" class="checkbox-item" id="east_asia" value = "East Asia & Pacific"> East Asia & Pacific
+                                    </a>
+    
+                                </div>
+                            </li>
+
                     </ul>
                     <ul class="navbar-nav ml-auto year-container">
                         <li class="nav-item">
